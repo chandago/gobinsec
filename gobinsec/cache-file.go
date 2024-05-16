@@ -132,7 +132,7 @@ func (fc *FileCache) Close() error {
 	if err != nil {
 		return fmt.Errorf("marshaling file cache: %v", err)
 	}
-	if err := os.WriteFile(fc.File, text, 0644); err != nil { // nolint:gosec,gomnd // no confidential data in file
+	if err := os.WriteFile(fc.File, text, 0644); err != nil {
 		return fmt.Errorf("saving file cache: %v", err)
 	}
 	return nil

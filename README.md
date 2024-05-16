@@ -2,6 +2,8 @@
 
 This tool parses Go binary dependencies and calls [NVD database](https://nvd.nist.gov/) to produce a vulnerability report. Binaries must have been built with module support to be analyzed with Gobinsec.
 
+> This product uses data from the NVD API but is not endorsed or certified by the NVD.
+
 ## Table of Contents
 
 1. [Installation](#installation)
@@ -280,80 +282,63 @@ For instance, to get vulnerabilities for library *golang.org/x/text*, we would c
 
 ```json
 {
-    "resultsPerPage": 1,
+    "resultsPerPage": 2,
     "startIndex": 0,
-    "totalResults": 1,
-    "result": {
-        "CVE_data_type": "CVE",
-        "CVE_data_format": "MITRE",
-        "CVE_data_version": "4.0",
-        "CVE_data_timestamp": "2021-12-07T15:40Z",
-        "CVE_Items": [
-            {
-                "cve": {
-                    "data_type": "CVE",
-                    "data_format": "MITRE",
-                    "data_version": "4.0",
-                    "CVE_data_meta": {
-                        "ID": "CVE-2020-14040",
-                        "ASSIGNER": "cve@mitre.org"
+    "totalResults": 2,
+    "format": "NVD_CVE",
+    "version": "2.0",
+    "timestamp": "2024-05-15T09:14:47.367",
+    "vulnerabilities": [
+        {
+            "cve": {
+                "id": "CVE-2020-14040",
+                "sourceIdentifier": "cve@mitre.org",
+                "published": "2020-06-17T20:15:09.993",
+                "lastModified": "2023-11-07T03:17:05.563",
+                "vulnStatus": "Modified",
+                "descriptions": [
+                    {
+                        "lang": "en",
+                        "value": "The x\/text package before 0.3.3 for Go has a vulnerability in encoding\/unicode that could lead to the UTF-16 decoder entering an infinite loop, causing the program to crash or run out of memory. An attacker could provide a single byte to a UTF16 decoder instantiated with UseBOM or ExpectBOM to trigger an infinite loop if the String function on the Decoder is called, or the Decoder is passed to golang.org\/x\/text\/transform.String."
                     },
-                    "problemtype": {
-                        ...
-                    },
-                    "references": {
-                        "reference_data": [
+                    ...
+                ],
+                "metrics": {
+                    ...
+                },
+                "weaknesses": [
+                    ...
+                ],
+                "configurations": [
+                    {
+                        "nodes": [
                             {
-                                "url": "https://groups.google.com/forum/#!topic/golang-announce/bXVeAmGOqz0",
-                                "name": "https://groups.google.com/forum/#!topic/golang-announce/bXVeAmGOqz0",
-                                "refsource": "MISC",
-                                "tags": [
-                                    "Third Party Advisory"
+                                "operator": "OR",
+                                "negate": false,
+                                "cpeMatch": [
+                                    {
+                                        "vulnerable": true,
+                                        "criteria": "cpe:2.3:a:golang:text:*:*:*:*:*:*:*:*",
+                                        "versionEndExcluding": "0.3.3",
+                                        "matchCriteriaId": "C111DDBC-C8B1-498F-8F36-C8AB6E1134D7"
+                                    }
                                 ]
-                            },
-                            ...
-                        ]
-                    },
-                    "description": {
-                        "description_data": [
-                            {
-                                "lang": "en",
-                                "value": "..."
                             }
                         ]
-                    }
-                },
-                "configurations": {
-                    "CVE_data_version": "4.0",
-                    "nodes": [
-                        {
-                            "operator": "OR",
-                            "children": [],
-                            "cpe_match": [
-                                {
-                                    "vulnerable": true,
-                                    "cpe23Uri": "cpe:2.3:a:golang:text:*:*:*:*:*:*:*:*",
-                                    "versionEndExcluding": "0.3.3",
-                                    "cpe_name": []
-                                }
-                            ]
-                        },
-                        ...
-                    ]
-                },
-                "impact": {
-                    "baseMetricV3": {
-                        ...
                     },
-                    "baseMetricV2": {
-                        ...
-                    }
-                },
-                "publishedDate": "2020-06-17T20:15Z",
-                "lastModifiedDate": "2020-11-18T14:44Z"
+                    ...
+                ],
+                "references": [
+                    {
+                        "url": "https:\/\/groups.google.com\/forum\/#%21topic\/golang-announce\/bXVeAmGOqz0",
+                        "source": "cve@mitre.org"
+                    },
+                    ...
+                ]
             }
-        ]
-    }
+        },
+        ...
+    ]
 }
 ```
 

@@ -1,0 +1,241 @@
+{
+    "resultsPerPage": 2,
+    "startIndex": 0,
+    "totalResults": 2,
+    "format": "NVD_CVE",
+    "version": "2.0",
+    "timestamp": "2024-05-15T09:14:47.367",
+    "vulnerabilities": [
+        {
+            "cve": {
+                "id": "CVE-2020-14040",
+                "sourceIdentifier": "cve@mitre.org",
+                "published": "2020-06-17T20:15:09.993",
+                "lastModified": "2023-11-07T03:17:05.563",
+                "vulnStatus": "Modified",
+                "descriptions": [
+                    {
+                        "lang": "en",
+                        "value": "The x\/text package before 0.3.3 for Go has a vulnerability in encoding\/unicode that could lead to the UTF-16 decoder entering an infinite loop, causing the program to crash or run out of memory. An attacker could provide a single byte to a UTF16 decoder instantiated with UseBOM or ExpectBOM to trigger an infinite loop if the String function on the Decoder is called, or the Decoder is passed to golang.org\/x\/text\/transform.String."
+                    },
+                    {
+                        "lang": "es",
+                        "value": "El paquete x\/text anterior a la versión 0.3.3 para Go tiene una vulnerabilidad en la codificación\/unicode que podría llevar al decodificador UTF-16 a ingresar en un bucle infinito, causando que el programa se bloquee o se ejecute fuera de la memoria. Un atacante podría proporcionar un solo byte a un decodificador UTF16 instanciado con UseBOM o ExpectBOM para activar un bucle infinito si se llama a la función String en el Decoder, o el Decoder es pasado a golang.org\/x\/text\/transform.String"
+                    }
+                ],
+                "metrics": {
+                    "cvssMetricV31": [
+                        {
+                            "source": "nvd@nist.gov",
+                            "type": "Primary",
+                            "cvssData": {
+                                "version": "3.1",
+                                "vectorString": "CVSS:3.1\/AV:N\/AC:L\/PR:N\/UI:N\/S:U\/C:N\/I:N\/A:H",
+                                "attackVector": "NETWORK",
+                                "attackComplexity": "LOW",
+                                "privilegesRequired": "NONE",
+                                "userInteraction": "NONE",
+                                "scope": "UNCHANGED",
+                                "confidentialityImpact": "NONE",
+                                "integrityImpact": "NONE",
+                                "availabilityImpact": "HIGH",
+                                "baseScore": 7.5,
+                                "baseSeverity": "HIGH"
+                            },
+                            "exploitabilityScore": 3.9,
+                            "impactScore": 3.6
+                        }
+                    ],
+                    "cvssMetricV2": [
+                        {
+                            "source": "nvd@nist.gov",
+                            "type": "Primary",
+                            "cvssData": {
+                                "version": "2.0",
+                                "vectorString": "AV:N\/AC:L\/Au:N\/C:N\/I:N\/A:P",
+                                "accessVector": "NETWORK",
+                                "accessComplexity": "LOW",
+                                "authentication": "NONE",
+                                "confidentialityImpact": "NONE",
+                                "integrityImpact": "NONE",
+                                "availabilityImpact": "PARTIAL",
+                                "baseScore": 5.0
+                            },
+                            "baseSeverity": "MEDIUM",
+                            "exploitabilityScore": 10.0,
+                            "impactScore": 2.9,
+                            "acInsufInfo": false,
+                            "obtainAllPrivilege": false,
+                            "obtainUserPrivilege": false,
+                            "obtainOtherPrivilege": false,
+                            "userInteractionRequired": false
+                        }
+                    ]
+                },
+                "weaknesses": [
+                    {
+                        "source": "nvd@nist.gov",
+                        "type": "Primary",
+                        "description": [
+                            {
+                                "lang": "en",
+                                "value": "CWE-835"
+                            }
+                        ]
+                    }
+                ],
+                "configurations": [
+                    {
+                        "nodes": [
+                            {
+                                "operator": "OR",
+                                "negate": false,
+                                "cpeMatch": [
+                                    {
+                                        "vulnerable": true,
+                                        "criteria": "cpe:2.3:a:golang:text:*:*:*:*:*:*:*:*",
+                                        "versionEndExcluding": "0.3.3",
+                                        "matchCriteriaId": "C111DDBC-C8B1-498F-8F36-C8AB6E1134D7"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "nodes": [
+                            {
+                                "operator": "OR",
+                                "negate": false,
+                                "cpeMatch": [
+                                    {
+                                        "vulnerable": true,
+                                        "criteria": "cpe:2.3:o:fedoraproject:fedora:32:*:*:*:*:*:*:*",
+                                        "matchCriteriaId": "36D96259-24BD-44E2-96D9-78CE1D41F956"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "references": [
+                    {
+                        "url": "https:\/\/groups.google.com\/forum\/#%21topic\/golang-announce\/bXVeAmGOqz0",
+                        "source": "cve@mitre.org"
+                    },
+                    {
+                        "url": "https:\/\/lists.fedoraproject.org\/archives\/list\/package-announce%40lists.fedoraproject.org\/message\/TACQFZDPA7AUR6TRZBCX2RGRFSDYLI7O\/",
+                        "source": "cve@mitre.org"
+                    }
+                ]
+            }
+        },
+        {
+            "cve": {
+                "id": "CVE-2021-38561",
+                "sourceIdentifier": "cve@mitre.org",
+                "published": "2022-12-26T06:15:10.560",
+                "lastModified": "2023-01-05T04:52:36.810",
+                "vulnStatus": "Analyzed",
+                "descriptions": [
+                    {
+                        "lang": "en",
+                        "value": "golang.org\/x\/text\/language in golang.org\/x\/text before 0.3.7 can panic with an out-of-bounds read during BCP 47 language tag parsing. Index calculation is mishandled. If parsing untrusted user input, this can be used as a vector for a denial-of-service attack."
+                    },
+                    {
+                        "lang": "es",
+                        "value": "golang.org\/x\/text\/language en golang.org\/x\/text anterior a 0.3.7 puede entrar en pánico con una lectura fuera de los límites durante el análisis de etiquetas de idioma BCP 47. El cálculo del índice está mal manejado. Si se analizan entradas de usuarios que no son de confianza, esto se puede utilizar como vector para un ataque de Denegación de Servicio (DoS)."
+                    }
+                ],
+                "metrics": {
+                    "cvssMetricV31": [
+                        {
+                            "source": "nvd@nist.gov",
+                            "type": "Primary",
+                            "cvssData": {
+                                "version": "3.1",
+                                "vectorString": "CVSS:3.1\/AV:N\/AC:L\/PR:N\/UI:N\/S:U\/C:N\/I:N\/A:H",
+                                "attackVector": "NETWORK",
+                                "attackComplexity": "LOW",
+                                "privilegesRequired": "NONE",
+                                "userInteraction": "NONE",
+                                "scope": "UNCHANGED",
+                                "confidentialityImpact": "NONE",
+                                "integrityImpact": "NONE",
+                                "availabilityImpact": "HIGH",
+                                "baseScore": 7.5,
+                                "baseSeverity": "HIGH"
+                            },
+                            "exploitabilityScore": 3.9,
+                            "impactScore": 3.6
+                        }
+                    ]
+                },
+                "weaknesses": [
+                    {
+                        "source": "nvd@nist.gov",
+                        "type": "Primary",
+                        "description": [
+                            {
+                                "lang": "en",
+                                "value": "CWE-125"
+                            }
+                        ]
+                    }
+                ],
+                "configurations": [
+                    {
+                        "nodes": [
+                            {
+                                "operator": "OR",
+                                "negate": false,
+                                "cpeMatch": [
+                                    {
+                                        "vulnerable": true,
+                                        "criteria": "cpe:2.3:a:golang:text:*:*:*:*:*:*:*:*",
+                                        "versionEndExcluding": "0.3.7",
+                                        "matchCriteriaId": "919DE51C-E76E-4EE1-B3EF-A56C603FC241"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "references": [
+                    {
+                        "url": "https:\/\/deps.dev\/advisory\/OSV\/GO-2021-0113",
+                        "source": "cve@mitre.org",
+                        "tags": [
+                            "Patch",
+                            "Third Party Advisory"
+                        ]
+                    },
+                    {
+                        "url": "https:\/\/go.googlesource.com\/text\/+\/383b2e75a7a4198c42f8f87833eefb772868a56f",
+                        "source": "cve@mitre.org",
+                        "tags": [
+                            "Mailing List",
+                            "Patch",
+                            "Vendor Advisory"
+                        ]
+                    },
+                    {
+                        "url": "https:\/\/groups.google.com\/g\/golang-announce",
+                        "source": "cve@mitre.org",
+                        "tags": [
+                            "Mailing List",
+                            "Third Party Advisory"
+                        ]
+                    },
+                    {
+                        "url": "https:\/\/pkg.go.dev\/golang.org\/x\/text\/language",
+                        "source": "cve@mitre.org",
+                        "tags": [
+                            "Product",
+                            "Vendor Advisory"
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

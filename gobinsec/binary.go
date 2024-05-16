@@ -84,7 +84,11 @@ func LoadVulnerabilities(dependencies chan *Dependency, wg *sync.WaitGroup) {
 		case dependency := <-dependencies:
 			if err := dependency.LoadVulnerabilities(); err != nil {
 				fmt.Fprintf(os.Stderr, "ERROR loading vulnerability: %v\n", err)
-				os.Exit(1)
+				if config.Recover {
+					os.Exit(0)
+				} else {
+					os.Exit(1)
+				}
 			}
 			wg.Done()
 		default:
@@ -94,7 +98,6 @@ func LoadVulnerabilities(dependencies chan *Dependency, wg *sync.WaitGroup) {
 }
 
 // Report prints a report on terminal
-// nolint:gocyclo // this is life
 func (b *Binary) Report() {
 	fmt.Printf("%s: ", filepath.Base(b.Path))
 	if b.Vulnerable {

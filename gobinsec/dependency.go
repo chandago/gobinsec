@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sort"
 	"time"
 )
 
 const (
-	URL                  = "https://services.nvd.nist.gov/rest/json/cves/1.0/?keyword="
+	URL                  = "https://services.nvd.nist.gov/rest/json/cves/2.0?keywordSearch="
 	StatusCodeLimit      = 300
 	RateMinuteWithoutKey = 10
 	RateMinuteWithKey    = 100
@@ -45,10 +46,14 @@ func (d *Dependency) LoadVulnerabilities() error {
 	if vulnerabilities == nil {
 		WaitBeforeCall()
 		url := URL + d.Name
-		if config.APIKey != "" {
-			url += "&apiKey=" + config.APIKey
+		request, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			return fmt.Errorf("creating NVD request: %v", err)
 		}
-		response, err := http.Get(url) // nolint:gosec // it's safe!
+		if config.APIKey != "" {
+			request.Header.Set("apiKey", config.APIKey)
+		}
+		response, err := http.Get(url)
 		if err != nil {
 			return fmt.Errorf("calling NVD: %v", err)
 		}
@@ -64,12 +69,12 @@ func (d *Dependency) LoadVulnerabilities() error {
 			return err
 		}
 	}
-	var result Response
+	var result Result
 	if err := json.Unmarshal(vulnerabilities, &result); err != nil {
 		return fmt.Errorf("decoding JSON response: %v", err)
 	}
-	for _, item := range result.Result.Items {
-		vulnerability, err := NewVulnerability(item)
+	for _, item := range result.Vulnerabilities {
+		vulnerability, err := NewVulnerability(item.CVE)
 		if err != nil {
 			return err
 		}
@@ -79,6 +84,9 @@ func (d *Dependency) LoadVulnerabilities() error {
 		}
 		d.Vulnerabilities = append(d.Vulnerabilities, *vulnerability)
 	}
+	sort.Slice(d.Vulnerabilities, func(i, j int) bool {
+		return d.Vulnerabilities[i].ID < d.Vulnerabilities[j].ID
+	})
 	return nil
 }
 

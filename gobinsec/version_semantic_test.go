@@ -18,7 +18,7 @@ func TestNewSemanticVersion(t *testing.T) {
 	}
 }
 
-func TestNewSemanticVersionErrors(t *testing.T) { // nolint:gocyclo // testing
+func TestNewSemanticVersionErrors(t *testing.T) {
 	_, err := NewSemanticVersion("x")
 	if err == nil || err.Error() != "wrong version parts count: x" {
 		t.Fatalf("wrong error parsing version: %v", err)
@@ -58,12 +58,11 @@ func TestVersionSemanticString(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error parsing version: %v", err)
 	}
-	if version.String() != "1.2.3" { // nolint:goconst // testing
+	if version.String() != "1.2.3" {
 		t.Fatalf("bad string version: %s", version.String())
 	}
 }
 
-// nolint:errcheck // testing
 func TestSemanticVersionCompare(t *testing.T) {
 	v1, _ := NewSemanticVersion("1.2.3")
 	v2, _ := NewSemanticVersion("1.2.3")

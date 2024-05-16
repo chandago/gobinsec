@@ -15,6 +15,7 @@ type Config struct {
 	File       *FileConfig       `yaml:"file"`
 	Ignore     []string          `yaml:"ignore"`
 	Strict     bool              `yaml:"strict"`
+	Recover    bool              `yaml:"recover"`
 	Verbose    bool              `yaml:"verbose"`
 	Cache      bool              `yaml:"cache"`
 	Wait       bool              `yaml:"wait"`
@@ -24,7 +25,7 @@ type Config struct {
 var config Config
 
 // LoadConfig loads configuration from given file and overwrite with command line options
-func LoadConfig(path string, strict, wait, verbose, cache bool) error {
+func LoadConfig(path string, strict, recovering, wait, verbose, cache bool) error {
 	if path != "" {
 		bytes, err := os.ReadFile(path)
 		if err != nil {
@@ -39,6 +40,9 @@ func LoadConfig(path string, strict, wait, verbose, cache bool) error {
 	}
 	if strict {
 		config.Strict = true
+	}
+	if recovering {
+		config.Recover = true
 	}
 	if wait {
 		config.Wait = true

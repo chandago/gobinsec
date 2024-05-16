@@ -1,3 +1,4 @@
 api-key: "${NVD_API_KEY}"
 ignore:
 - "CVE-2020-14040"
+- "CVE-2021-38561"

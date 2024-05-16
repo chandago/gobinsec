@@ -18,7 +18,7 @@ func NewSemanticVersion(text string) (*SemanticVersion, error) {
 	parts := strings.TrimPrefix(text, "v")
 	parts = strings.TrimSuffix(parts, "+incompatible")
 	numbers := strings.Split(parts, ".")
-	if len(numbers) != 3 { // nolint:gomnd // 3 is magic
+	if len(numbers) != 3 {
 		return nil, fmt.Errorf("wrong version parts count: %s", text)
 	}
 	var err error
