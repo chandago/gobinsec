@@ -8,6 +8,7 @@ GOOSARCH  = $(shell go tool dist list | grep -v android)
 .DEFAULT_GOAL :=
 default: clean fmt lint test integ gobinsec
 
+.PHONY: clean
 clean: # Clean generated files
 	$(title)
 	@rm -rf $(BUILD_DIR)
@@ -15,11 +16,13 @@ clean: # Clean generated files
 	@go clean -cache
 	@echo "$(GRE)OK$(END) cache cleaned"
 
+.PHONY: fmt
 fmt: # Format Go code
 	$(title)
 	@go fmt ./...
 	@echo "$(GRE)OK$(END) code formatted"
 
+.PHONY: lint
 lint: # Check Go code
 	$(title)
 	@golangci-lint run ./...
@@ -50,6 +53,7 @@ install: # Build and install tool
 	@go install .
 	@echo "$(GRE)OK$(END) binary installed"
 
+.PHONY: integ
 integ: build # Run integration test
 	$(title)
 	-@$(BUILD_DIR)/gobinsec test/binary > $(BUILD_DIR)/report.yml
@@ -60,6 +64,7 @@ integ: build # Run integration test
 	@cmp test/report-config.yml $(BUILD_DIR)/report-config.yml
 	@echo "$(GRE)OK$(END) integration tests passed"
 
+.PHONY: binaries
 binaries: # Generate binaries
 	$(title)
 	@mkdir -p $(BUILD_DIR)/bin
@@ -67,7 +72,15 @@ binaries: # Generate binaries
 	@cp install $(BUILD_DIR)/bin/
 	@echo "$(GRE)OK$(END) binaries generated"
 
-release: clean lint test integ binaries # Perform release (must pass VERSION=X.Y.Z on command line)
+.PHONY: archive
+archive: clean binaries # Generate archive
+	$(title)
+	@cp README.md LICENSE.txt $(BUILD_DIR)/
+	@cd $(BUILD_DIR) && tar -czf gobinsec-$(VERSION).tar.gz *
+	@echo "$(GRE)OK$(END) archive generated"
+
+.PHONY: release
+release: clean lint test integ gobinsec archive # Perform release (must pass VERSION=X.Y.Z on command line)
 	$(title)
 	@if [ "$(VERSION)" = "UNKNOWN" ]; then \
 		echo "ERROR you must pass VERSION=X.Y.Z on command line"; \
@@ -79,6 +92,7 @@ release: clean lint test integ binaries # Perform release (must pass VERSION=X.Y
 	@git push origin --tags
 	@echo "$(GRE)OK$(END) release $(VERSION) created and pushed"
 
+.PHONY: memcached
 memcached: # Start memcached
 	$(title)
 	@docker-compose up -d memcached
