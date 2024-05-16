@@ -1,7 +1,0 @@
-api-key: 'd2467a9a-ca39-449a-94f3-6e624266aed1'
-
-memcachier:
-  username:   "9D2114"
-  password:   "520D9BF750DAF7772A3924C46BD3EFA3"
-  address:    "mc4.c1.eu-central-1.ec2.memcachier.com:11211"
-  expiration: "250h"
