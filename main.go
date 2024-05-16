@@ -21,7 +21,6 @@ func main() {
 	cache := flag.Bool("cache", false, "Print cache information in terminal")
 	wait := flag.Bool("wait", false, "Wait between NVD API calls")
 	strict := flag.Bool("strict", false, "Vulnerabilities without version are exposed")
-	recovering := flag.Bool("recover", false, "Ignore errors calling NVD")
 	config := flag.String("config", "", "Configuration file")
 	flag.Parse()
 	if *version {
@@ -32,7 +31,7 @@ func main() {
 		println("ERROR you must pass binary/ies to analyze on command line")
 		os.Exit(CodeError)
 	}
-	if err := gobinsec.LoadConfig(*config, *strict, *recovering, *wait, *verbose, *cache); err != nil {
+	if err := gobinsec.LoadConfig(*config, *strict, *wait, *verbose, *cache); err != nil {
 		println(fmt.Sprintf("ERROR %v", err))
 		os.Exit(CodeError)
 	}

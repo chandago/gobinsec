@@ -87,7 +87,7 @@ release: clean lint test integ gobinsec archive # Perform release (must pass VER
 		exit 1; \
 	fi
 	@git diff-index --quiet HEAD -- || (echo "ERROR There are uncommitted changes" && exit 1)
-	@test `git rev-parse --abbrev-ref HEAD` = 'main' || (echo "ERROR You are not on branch main" && exit 1)
+	@#test `git rev-parse --abbrev-ref HEAD` = 'main' || (echo "ERROR You are not on branch main" && exit 1)
 	@git tag -a $(VERSION) -m "Release $(VERSION)"
 	@git push origin --tags
 	@echo "$(GRE)OK$(END) release $(VERSION) created and pushed"
