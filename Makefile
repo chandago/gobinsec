@@ -31,7 +31,7 @@ lint: # Check Go code
 .PHONY: gobinsec
 gobinsec: build # Check binary for vulnerabilities
 	$(title)
-	@gobinsec -config .gobinsec.yml -wait $(shell find $(BUILD_DIR)/* -perm -u+x)
+	@gobinsec -wait $(shell find $(BUILD_DIR)/* -perm -u+x)
 	@echo "$(GRE)OK$(END) code checked for vulnerabilities"
 
 .PHONY: test
