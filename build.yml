@@ -1,0 +1,3 @@
+# NeON build file (https://c4s4/neon)
+
+extends: chandago/neon/golang.yml

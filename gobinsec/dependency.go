@@ -29,14 +29,16 @@ type Dependency struct {
 
 // timeLastCall is time for last NVD API call
 var timeLastCall time.Time
+
 // WaitWithoutKey is the time to wait between NVD API calls without API key
 var WaitWithoutKey time.Duration
+
 // WaitWithKey is the time to wait between NVD API calls with API key
 var WaitWithKey time.Duration
 
-func init () {
-    WaitWithoutKey, _ = time.ParseDuration(WaitStringWithoutKey)
-    WaitWithKey, _ = time.ParseDuration(WaitStringWithKey)
+func init() {
+	WaitWithoutKey, _ = time.ParseDuration(WaitStringWithoutKey)
+	WaitWithKey, _ = time.ParseDuration(WaitStringWithKey)
 }
 
 // NewDependency builds a new dependency and loads its vulnerabilities

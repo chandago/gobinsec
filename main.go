@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/intercloud/gobinsec/gobinsec"
+	"github.com/chandago/gobinsec/gobinsec"
 )
 
 const (
