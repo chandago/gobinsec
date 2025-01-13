@@ -1,5 +1,8 @@
 package gobinsec
 
+// NVD API rate limit are specified in the following link:
+// https://nvd.nist.gov/developers/start-here
+
 import (
 	"encoding/json"
 	"fmt"
@@ -12,12 +15,9 @@ import (
 const (
 	URL                  = "https://services.nvd.nist.gov/rest/json/cves/2.0?keywordSearch="
 	StatusCodeLimit      = 300
-	RateMinuteWithoutKey = 10
-	RateMinuteWithKey    = 100
+	WaitStringWithoutKey = "7s"
+	WaitStringWithKey    = "0.7s"
 )
-
-// timeLastCall is time for last NVD API call
-var timeLastCall time.Time
 
 // Dependency is a dependency with vulnerabilities
 type Dependency struct {
@@ -25,6 +25,18 @@ type Dependency struct {
 	Version         Version
 	Vulnerabilities []Vulnerability
 	Vulnerable      bool
+}
+
+// timeLastCall is time for last NVD API call
+var timeLastCall time.Time
+// WaitWithoutKey is the time to wait between NVD API calls without API key
+var WaitWithoutKey time.Duration
+// WaitWithKey is the time to wait between NVD API calls with API key
+var WaitWithKey time.Duration
+
+func init () {
+    WaitWithoutKey, _ = time.ParseDuration(WaitStringWithoutKey)
+    WaitWithKey, _ = time.ParseDuration(WaitStringWithKey)
 }
 
 // NewDependency builds a new dependency and loads its vulnerabilities
@@ -94,9 +106,9 @@ func (d *Dependency) LoadVulnerabilities() error {
 func WaitBeforeCall() {
 	if config.Wait {
 		elapsedSinceLastCall := time.Since(timeLastCall)
-		timeToSleep := (60000 / RateMinuteWithoutKey) * time.Millisecond
+		timeToSleep := WaitWithoutKey
 		if config.APIKey != "" {
-			timeToSleep = (60000 / RateMinuteWithKey) * time.Millisecond
+			timeToSleep = WaitWithKey
 		}
 		timeToWait := timeToSleep - elapsedSinceLastCall
 		if timeToWait > 0 {
