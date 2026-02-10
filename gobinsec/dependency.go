@@ -27,9 +27,6 @@ type Dependency struct {
 	Vulnerable      bool
 }
 
-// timeLastCall is time for last NVD API call
-var timeLastCall time.Time
-
 // WaitWithoutKey is the time to wait between NVD API calls without API key
 var WaitWithoutKey time.Duration
 
@@ -107,16 +104,11 @@ func (d *Dependency) LoadVulnerabilities() error {
 // WaitBeforeCall waits in order not to exceed NVD call rate limit
 func WaitBeforeCall() {
 	if config.Wait {
-		elapsedSinceLastCall := time.Since(timeLastCall)
-		timeToSleep := WaitWithoutKey
 		if config.APIKey != "" {
-			timeToSleep = WaitWithKey
+			time.Sleep(WaitWithKey)
+		} else {
+			time.Sleep(WaitWithoutKey)
 		}
-		timeToWait := timeToSleep - elapsedSinceLastCall
-		if timeToWait > 0 {
-			time.Sleep(timeToWait)
-		}
-		timeLastCall = time.Now()
 	}
 }
 
