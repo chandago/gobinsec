@@ -1,0 +1,9 @@
+ignore:
+# golang.org/x/net
+- 'CVE-2021-33194'
+# golang.org/x/crypto
+- 'CVE-2019-11840'
+- 'CVE-2020-29652'
+- 'CVE-2021-43565'
+- 'CVE-2022-27191'
+- 'CVE-2023-48795'

@@ -4,3 +4,4 @@ extends: chandago/neon/golang.yml
 
 properties:
   OS_ARCH: [darwin/amd64, darwin/arm64, linux/amd64, windows/amd64]
+  AUDIT_ENABLED: true
