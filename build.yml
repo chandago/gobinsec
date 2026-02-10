@@ -11,4 +11,11 @@ targets:
     depends: [branch, version, clean, lint, test, archive]
     doc: "Perform a release"
     steps:
-    - super:
+    - if: 'exists("go.mod")'
+      then:
+      # GO project: get tag vX.Y.Z from Gitlab
+      - $: [git, pull, --rebase]
+      else:
+      # Not a GO project: tag X.Y.Z and push to Gitlab
+      - $: [git, tag, =VERSION]
+      - $: [git, push, --tags]
