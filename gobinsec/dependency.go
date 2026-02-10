@@ -13,10 +13,12 @@ import (
 )
 
 const (
-	URL                  = "https://services.nvd.nist.gov/rest/json/cves/2.0?keywordSearch="
-	StatusCodeLimit      = 300
-	WaitStringWithoutKey = "7s"
-	WaitStringWithKey    = "0.7s"
+	URL                   = "https://services.nvd.nist.gov/rest/json/cves/2.0?keywordSearch="
+	StatusCodeLimit       = 300
+	WaitStringWithoutKey  = "7s"
+	WaitStringWithKey     = "0.7s"
+	WaitOnTooManyAttempts = 30 * time.Second
+	MaxAttempts           = 3
 )
 
 // Dependency is a dependency with vulnerabilities
@@ -56,23 +58,7 @@ func (d *Dependency) LoadVulnerabilities() error {
 	}
 	if vulnerabilities == nil {
 		WaitBeforeCall()
-		url := URL + d.Name
-		request, err := http.NewRequest("GET", url, nil)
-		if err != nil {
-			return fmt.Errorf("creating NVD request: %v", err)
-		}
-		if config.APIKey != "" {
-			request.Header.Set("apiKey", config.APIKey)
-		}
-		response, err := http.Get(url)
-		if err != nil {
-			return fmt.Errorf("calling NVD: %v", err)
-		}
-		defer func() { _ = response.Body.Close() }()
-		if response.StatusCode >= StatusCodeLimit {
-			return fmt.Errorf("bad status code calling NVD: %d", response.StatusCode)
-		}
-		vulnerabilities, err = io.ReadAll(response.Body)
+		vulnerabilities, err = d.fetchVulnerabilities(0)
 		if err != nil {
 			return err
 		}
@@ -115,4 +101,34 @@ func WaitBeforeCall() {
 // Key returns a key as a string for caching
 func (d *Dependency) Key() string {
 	return d.Name
+}
+
+func (d *Dependency) fetchVulnerabilities(attempt int) ([]byte, error) {
+	url := URL + d.Name
+	request, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("creating NVD request: %v", err)
+	}
+	if config.APIKey != "" {
+		request.Header.Set("apiKey", config.APIKey)
+	}
+	response, err := http.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("calling NVD: %v", err)
+	}
+	defer func() { _ = response.Body.Close() }()
+	if response.StatusCode >= StatusCodeLimit {
+		if response.StatusCode == http.StatusTooManyRequests {
+			if attempt < MaxAttempts {
+				time.Sleep(WaitOnTooManyAttemps)
+				return d.fetchVulnerabilities(attempt + 1)
+			}
+		}
+		return nil, fmt.Errorf("bad status code calling NVD: %d", response.StatusCode)
+	}
+	vulnerabilities, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+	return vulnerabilities, nil
 }
