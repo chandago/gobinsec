@@ -5,3 +5,11 @@ extends: chandago/neon/golang.yml
 properties:
   OS_ARCH: [darwin/amd64, darwin/arm64, linux/amd64, windows/amd64]
   AUDIT_ENABLED: true
+
+targets:
+
+  release:
+    depends: [branch, version, clean, lint, test, archive]
+    doc: "Perform a release"
+    steps:
+    - super:
