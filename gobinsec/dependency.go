@@ -120,7 +120,7 @@ func (d *Dependency) fetchVulnerabilities(attempt int) ([]byte, error) {
 	if response.StatusCode >= StatusCodeLimit {
 		if response.StatusCode == http.StatusTooManyRequests {
 			if attempt < MaxAttempts {
-				time.Sleep(WaitOnTooManyAttemps)
+				time.Sleep(WaitOnTooManyAttempts)
 				return d.fetchVulnerabilities(attempt + 1)
 			}
 		}
