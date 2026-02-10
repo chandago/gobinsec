@@ -71,7 +71,7 @@ func (d *Dependency) LoadVulnerabilities() error {
 		if err != nil {
 			return fmt.Errorf("calling NVD: %v", err)
 		}
-		defer response.Body.Close()
+		defer func() { _ = response.Body.Close() }()
 		if response.StatusCode >= StatusCodeLimit {
 			return fmt.Errorf("bad status code calling NVD: %d", response.StatusCode)
 		}

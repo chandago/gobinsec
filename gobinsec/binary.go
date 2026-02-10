@@ -97,9 +97,9 @@ func LoadVulnerabilities(dependencies chan *Dependency, wg *sync.WaitGroup) {
 func (b *Binary) Report() {
 	fmt.Printf("%s: ", filepath.Base(b.Path))
 	if b.Vulnerable {
-		ColorRed.Println("VULNERABLE")
+		_, _ = ColorRed.Println("VULNERABLE")
 	} else {
-		ColorGreen.Println("OK")
+		_, _ = ColorGreen.Println("OK")
 	}
 	if len(b.Dependencies) > 0 && (b.Vulnerable || config.Verbose) {
 		fmt.Println("dependencies:")

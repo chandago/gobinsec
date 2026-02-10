@@ -1,15 +1,3 @@
-# configuration for golangci-lint
+version: "2"
 run:
-  go: '1.22'
-
-linters:
-  enable:
-  # default
-  - 'errcheck'
-  - 'gosimple'
-  - 'govet'
-  - 'ineffassign'
-  - 'staticcheck'
-  - 'typecheck'
-  # added
-  - 'gofmt'
+  go: "1.25"
