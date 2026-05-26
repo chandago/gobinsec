@@ -7,3 +7,4 @@ memcachier:
   expiration: "24h"
 ignore:
 - "CVE-2020-14040"
+- "CVE-2021-38561"
