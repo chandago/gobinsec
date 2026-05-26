@@ -1,5 +1,10 @@
 # GoBinSec
 
+## 2026-05-?? : 1.2.4
+
+- Bug fixes
+- Automated integration tests
+
 ## 2026-02-10 : 1.2.3
 
 - Fixed wait on too many calls to the NVD API
