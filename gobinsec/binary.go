@@ -55,20 +55,31 @@ func (b *Binary) GetDependencies() error {
 		}
 		b.Dependencies = append(b.Dependencies, dependency)
 	}
-	dependencies := make(chan *Dependency, len(b.Dependencies))
-	var wg sync.WaitGroup
-	for _, dependency := range b.Dependencies {
-		dependencies <- dependency
-		wg.Add(1)
-	}
 	numGoroutines := NumGoroutines
 	if config.Wait {
 		numGoroutines = 1
 	}
+	dependencies := make(chan *Dependency, len(b.Dependencies))
+	for _, dependency := range b.Dependencies {
+		dependencies <- dependency
+	}
+	close(dependencies)
+	var wg sync.WaitGroup
+	wg.Add(numGoroutines)
+	errCh := make(chan error, numGoroutines)
 	for i := 0; i < numGoroutines; i++ {
-		go LoadVulnerabilities(dependencies, &wg)
+		go func() {
+			defer wg.Done()
+			if err := LoadVulnerabilities(dependencies); err != nil {
+				errCh <- err
+			}
+		}()
 	}
 	wg.Wait()
+	close(errCh)
+	if err, ok := <-errCh; ok {
+		return err
+	}
 	for _, dependency := range b.Dependencies {
 		if dependency.Vulnerable {
 			b.Vulnerable = true
@@ -78,19 +89,13 @@ func (b *Binary) GetDependencies() error {
 }
 
 // LoadVulnerabilities takes dependencies from channel and loads dependencies for it
-func LoadVulnerabilities(dependencies chan *Dependency, wg *sync.WaitGroup) {
-	for {
-		select {
-		case dependency := <-dependencies:
-			if err := dependency.LoadVulnerabilities(); err != nil {
-				fmt.Fprintf(os.Stderr, "ERROR loading vulnerability: %v\n", err)
-				os.Exit(1)
-			}
-			wg.Done()
-		default:
-			return
+func LoadVulnerabilities(dependencies chan *Dependency) error {
+	for dependency := range dependencies {
+		if err := dependency.LoadVulnerabilities(); err != nil {
+			return fmt.Errorf("loading vulnerability: %w", err)
 		}
 	}
+	return nil
 }
 
 // Report prints a report on terminal

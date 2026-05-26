@@ -39,17 +39,18 @@ func main() {
 		println(fmt.Sprintf("ERROR building cache: %v", err))
 		os.Exit(CodeError)
 	}
-	issue := false
+	vulnerable := false
+	analysisError := false
 	for _, path := range flag.Args() {
 		binary, err := gobinsec.NewBinary(path)
 		if err != nil {
 			_, _ = gobinsec.ColorRed.Print("ERROR")
 			fmt.Printf(" analyzing %s: %v\n", path, err)
-			issue = true
+			analysisError = true
 		} else {
 			binary.Report()
 			if binary.Vulnerable {
-				issue = true
+				vulnerable = true
 			}
 		}
 	}
@@ -57,7 +58,10 @@ func main() {
 		fmt.Fprintf(os.Stderr, "ERROR closing cache: %v\n", err)
 		os.Exit(CodeError)
 	}
-	if issue {
+	if analysisError {
+		os.Exit(CodeError)
+	}
+	if vulnerable {
 		os.Exit(CodeVulnerable)
 	}
 }

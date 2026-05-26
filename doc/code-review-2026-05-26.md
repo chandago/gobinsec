@@ -144,4 +144,7 @@ Toutes les fonctions IO (HTTP, memcached) ignorent `context.Context`. Pas de mé
 ## Correctifs
 
 - **#1** — [gobinsec/dependency.go](../gobinsec/dependency.go) : remplacement de `http.Get(url)` par `client.Do(request)`, l'en-tête `apiKey` est désormais effectivement transmis à NVD.
+- **#2** — [gobinsec/binary.go](../gobinsec/binary.go) : suppression de l'`os.Exit(1)` dans la goroutine ; `LoadVulnerabilities` retourne désormais `error`, l'erreur remonte à `main` via `GetDependencies` et `CacheInstance.Close()` est garanti.
+- **#3 (partiel)** — [gobinsec/binary.go](../gobinsec/binary.go) : passage au patron canonique `for dep := range ch` côté workers + `close(ch)` côté producteur, éliminant le risque de deadlock et la sortie prématurée des workers. La cadence par rate limiter (au lieu de `numGoroutines = 1` quand `config.Wait`) reste à traiter.
 - **#5** — [gobinsec/dependency.go](../gobinsec/dependency.go) : introduction de la constante `HTTPRequestTimeout = 30 * time.Second` et utilisation d'un `http.Client{Timeout: HTTPRequestTimeout}` pour les appels NVD.
+- **#8** — [main.go](../main.go) : distinction entre erreur d'analyse (`CodeError`) et binaire vulnérable (`CodeVulnerable`) ; un échec NVD n'est plus reporté comme « vulnérable » au CI.
