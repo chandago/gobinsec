@@ -115,14 +115,13 @@ func (mc *MemcachierClient) Set(d *Dependency, v []byte) error {
 	return nil
 }
 
-// Ping calls Memcachier
+// Open checks connectivity by querying a non-existent key; ErrCacheMiss is a successful round-trip.
 func (mc *MemcachierClient) Open() error {
-	item := memcache.Item{
-		Key:        "test",
-		Value:      []byte("test"),
-		Expiration: int32(mc.Expiration.Seconds()),
+	_, err := mc.Client.Get("gobinsec-connectivity-probe")
+	if err != nil && !errors.Is(err, memcache.ErrCacheMiss) {
+		return err
 	}
-	return mc.Client.Set(&item)
+	return nil
 }
 
 // Clean does nothing
