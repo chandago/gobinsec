@@ -49,11 +49,7 @@ func (b *Binary) GetDependencies() error {
 		for dep.Replace != nil {
 			dep = dep.Replace
 		}
-		dependency, err := NewDependency(dep.Path, dep.Version)
-		if err != nil {
-			return err
-		}
-		b.Dependencies = append(b.Dependencies, dependency)
+		b.Dependencies = append(b.Dependencies, NewDependency(dep.Path, dep.Version))
 	}
 	numGoroutines := NumGoroutines
 	if config.Wait {

@@ -41,14 +41,12 @@ func init() {
 	WaitWithKey, _ = time.ParseDuration(WaitStringWithKey)
 }
 
-// NewDependency builds a new dependency and loads its vulnerabilities
-func NewDependency(name, version string) (*Dependency, error) {
-	v := NewVersion(version)
-	dependency := Dependency{
+// NewDependency builds a new dependency
+func NewDependency(name, version string) *Dependency {
+	return &Dependency{
 		Name:    name,
-		Version: v,
+		Version: NewVersion(version),
 	}
-	return &dependency, nil
 }
 
 // Vulnerabilities return list of vulnerabilities for given dependency

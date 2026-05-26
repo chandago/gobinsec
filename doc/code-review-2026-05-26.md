@@ -151,3 +151,4 @@ Toutes les fonctions IO (HTTP, memcached) ignorent `context.Context`. Pas de mé
 - **#6** — [gobinsec/cache-memcachier.go](../gobinsec/cache-memcachier.go) : `Open()` ne pollue plus le cache avec une entrée `test=test` ; sonde de connectivité via `Get` sur une clé inexistante, `ErrCacheMiss` traité comme un round-trip réussi.
 - **#7** — [gobinsec/cache-file.go](../gobinsec/cache-file.go) : permissions du fichier de cache passées de `0644` à `0600` ; le cache n'est plus lisible par les autres utilisateurs du poste.
 - **#8** — [main.go](../main.go) : distinction entre erreur d'analyse (`CodeError`) et binaire vulnérable (`CodeVulnerable`) ; un échec NVD n'est plus reporté comme « vulnérable » au CI.
+- **#9** — [gobinsec/dependency.go](../gobinsec/dependency.go) et [gobinsec/binary.go](../gobinsec/binary.go) : `NewDependency` ne retourne plus de `error` (qu'il ne produisait jamais) ; site d'appel simplifié.
