@@ -143,4 +143,5 @@ Toutes les fonctions IO (HTTP, memcached) ignorent `context.Context`. Pas de mé
 
 ## Correctifs
 
-*(Aucun correctif appliqué à ce jour. Cette section sera complétée à mesure que les problèmes ci-dessus seront traités. Chaque entrée portera le numéro du problème, le fichier modifié, et la nature succincte du correctif.)*
+- **#1** — [gobinsec/dependency.go](../gobinsec/dependency.go) : remplacement de `http.Get(url)` par `client.Do(request)`, l'en-tête `apiKey` est désormais effectivement transmis à NVD.
+- **#5** — [gobinsec/dependency.go](../gobinsec/dependency.go) : introduction de la constante `HTTPRequestTimeout = 30 * time.Second` et utilisation d'un `http.Client{Timeout: HTTPRequestTimeout}` pour les appels NVD.

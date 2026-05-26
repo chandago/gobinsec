@@ -18,6 +18,7 @@ const (
 	WaitStringWithoutKey  = "7s"
 	WaitStringWithKey     = "0.7s"
 	WaitOnTooManyAttempts = 30 * time.Second
+	HTTPRequestTimeout    = 30 * time.Second
 	MaxAttempts           = 3
 )
 
@@ -104,15 +105,15 @@ func (d *Dependency) Key() string {
 }
 
 func (d *Dependency) fetchVulnerabilities(attempt int) ([]byte, error) {
-	url := URL + d.Name
-	request, err := http.NewRequest("GET", url, nil)
+	client := &http.Client{Timeout: HTTPRequestTimeout}
+	request, err := http.NewRequest("GET", URL+d.Name, nil)
 	if err != nil {
 		return nil, fmt.Errorf("creating NVD request: %v", err)
 	}
 	if config.APIKey != "" {
 		request.Header.Set("apiKey", config.APIKey)
 	}
-	response, err := http.Get(url)
+	response, err := client.Do(request)
 	if err != nil {
 		return nil, fmt.Errorf("calling NVD: %v", err)
 	}
