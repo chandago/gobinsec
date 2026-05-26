@@ -10,11 +10,6 @@ import (
 	"sync"
 )
 
-const (
-	MinimumBinaryDependencyFields = 3
-	MinimumBinaryLines            = 3
-)
-
 // NumGoroutines to load vulnerabilities
 var NumGoroutines = 4 * runtime.NumCPU()
 
