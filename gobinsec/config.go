@@ -43,8 +43,12 @@ func LoadConfig(path string, strict, wait, verbose, cache bool) error {
 	if wait {
 		config.Wait = true
 	}
-	config.Verbose = verbose
-	config.Cache = cache
+	if verbose {
+		config.Verbose = true
+	}
+	if cache {
+		config.Cache = true
+	}
 	return nil
 }
 
