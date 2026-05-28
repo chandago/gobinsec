@@ -45,4 +45,4 @@ targets:
   dist:
     doc: "Deploy binaries on distribution server"
     steps:
-    - $: 'scp ={BUILD_DIR}/={BIN_DIR}/newton-* ={DIST_ADDRESS}'
+    - $: 'scp ={BUILD_DIR}/={BIN_DIR}/gobinsec-* ={DIST_ADDRESS}'
