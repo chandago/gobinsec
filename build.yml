@@ -10,7 +10,7 @@ targets:
 
   release:
     doc: "Perform a release"
-    depends: [branch, version, lint, test, integ, archive, deploy, dist]
+    depends: [branch, version, lint, test, integ, archive, dist]
     steps:
     - $: [git, tag, 'v={VERSION}']
     - $: [git, push, --tags]
