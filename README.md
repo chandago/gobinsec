@@ -66,7 +66,7 @@ dependencies:
     references:
     - 'https://groups.google.com/forum/#!topic/golang-announce/bXVeAmGOqz0'
     - 'https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/TACQFZDPA7AUR6TRZBCX2RGRFSDYLI7O/'
-    matchs:
+    matches:
     - 'v < 0.3.3'
     - '?'
 ```

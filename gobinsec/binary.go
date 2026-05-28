@@ -121,8 +121,8 @@ func (b *Binary) Report() {
 					for _, reference := range vulnerability.References {
 						fmt.Printf("    - '%s'\n", reference)
 					}
-					fmt.Println("    matchs:")
-					for _, match := range vulnerability.Matchs {
+					fmt.Println("    matches:")
+					for _, match := range vulnerability.Matches {
 						var text string
 						if match.VersionStartExcluding != nil ||
 							match.VersionStartIncluding != nil ||

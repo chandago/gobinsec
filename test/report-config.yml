@@ -12,7 +12,7 @@ dependencies:
     - 'https://groups.google.com/forum/#%21topic/golang-announce/bXVeAmGOqz0'
     - 'https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/TACQFZDPA7AUR6TRZBCX2RGRFSDYLI7O/'
     - 'https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/TACQFZDPA7AUR6TRZBCX2RGRFSDYLI7O/'
-    matchs:
+    matches:
     - 'v < 0.3.3'
     - '?'
   - id: 'CVE-2021-38561'
@@ -27,5 +27,5 @@ dependencies:
     - 'https://groups.google.com/g/golang-announce'
     - 'https://pkg.go.dev/golang.org/x/text/language'
     - 'https://pkg.go.dev/golang.org/x/text/language'
-    matchs:
+    matches:
     - 'v < 0.3.7'

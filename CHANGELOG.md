@@ -2,7 +2,8 @@
 
 ## 2026-05-?? : 1.2.4
 
-- Bug fixes
+- **Breaking**: renamed YAML report key `matchs` to `matches` (update any external parsers)
+- Fixes after Claude code review
 - Automated integration tests
 
 ## 2026-02-10 : 1.2.3
