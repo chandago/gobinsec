@@ -12,6 +12,31 @@ func TestNewPseudoVersion(t *testing.T) {
 	}
 }
 
+func TestNewPseudoVersionPreRelease(t *testing.T) {
+	// Pre-release form: the timestamp is still the penultimate "-"-separated part.
+	pseudoVersion, err := NewPseudoVersion("v1.2.3-pre.0.20191109021931-daa7c04131f5")
+	if err != nil {
+		t.Fatalf("parsing pre-release pseudo version: %v", err)
+	}
+	if pseudoVersion.Date.Format(PseudoVersionTimeFormat) != "20191109" {
+		t.Fatalf("bad pseudo version time: %s", pseudoVersion.Date.Format(PseudoVersionTimeFormat))
+	}
+}
+
+func TestNewPseudoVersionRejectsMalformed(t *testing.T) {
+	cases := []string{
+		"v0.0.0",                                  // too few parts
+		"v0.0.0-XYZ-daa7c04131f5",                 // timestamp wrong length
+		"v0.0.0-20191109021931",                   // missing commit hash
+		"v0.0.0-99999999999999-daa7c04131f5",      // 14 chars but not a valid date
+	}
+	for _, c := range cases {
+		if _, err := NewPseudoVersion(c); err == nil {
+			t.Fatalf("expected error for %q", c)
+		}
+	}
+}
+
 func TestPseudoVersionString(t *testing.T) {
 	pseudoVersion, err := NewPseudoVersion("v0.0.0-20191109021931-daa7c04131f5")
 	if err != nil {
