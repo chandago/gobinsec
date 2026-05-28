@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(git remote *)",
-      "Read(//usr/local/bin/**)"
+      "Read(//usr/local/bin/**)",
+      "Bash(go env *)",
+      "Bash(go mod *)",
+      "Bash(echo \"exit=$?\")"
     ]
   }
 }

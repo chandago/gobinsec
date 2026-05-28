@@ -3,7 +3,6 @@ module github.com/chandago/gobinsec
 go 1.26.3
 
 require (
-	github.com/bradfitz/gomemcache v0.0.0-20260422231931-4d751bb6e37c
 	github.com/fatih/color v1.19.0
 	github.com/memcachier/gomemcache v0.0.0-20170425125614-d027381f7653
 	gopkg.in/yaml.v3 v3.0.1
