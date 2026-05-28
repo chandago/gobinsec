@@ -22,7 +22,35 @@ This tool parses Go binary dependencies and calls [NVD database](https://nvd.nis
 
 ## Installation
 
-Download the binary for your platform from the [latest release](https://github.com/chandago/gobinsec/releases). Rename it *gobinsec*, make it executable with `chmod +x gobinsec` and move it somewhere in your *PATH*.
+### Unix users (Linux, BSDs and MacOSX)
+
+Unix users may download and install latest Gobinsec release with command:
+
+```bash
+sh -c "$(curl https://sweetohm.net/dist/gobinsec/install)"
+```
+
+If *curl* is not installed on you system, you might run:
+
+```bash
+sh -c "$(wget -O - https://sweetohm.net/dist/gobinsec/install)"
+```
+
+**Note:** Some directories are protected, even as *root*, on **MacOSX** (since *El Capitan* release), thus you can't install gobinsec in */usr/bin* for instance.
+
+### Go developers
+
+Go developers can install latest release with following command:
+
+```bash
+go get -u github.com/chandago/gobinsec
+```
+
+Note that *Gobinsec* built this way won't display version number with `gobinsec -version` command and that you must build with Go *1.26.3* or newer.
+
+### Binary package
+
+Otherwise, you can download latest binary archive at <https://github.com/chandago/gobinsec/releases>. Unzip the archive, put the binary of your platform somewhere in your *PATH*, rename it *gobinsec* and make it executable with `chmod +x gobinsec`.
 
 ## Usage
 
