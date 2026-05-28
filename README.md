@@ -43,7 +43,7 @@ sh -c "$(wget -O - https://sweetohm.net/dist/gobinsec/install)"
 Go developers can install latest release with following command:
 
 ```bash
-go get -u github.com/chandago/gobinsec
+go install github.com/chandago/gobinsec
 ```
 
 Note that *Gobinsec* built this way won't display version number with `gobinsec -version` command and that you must build with Go *1.26.3* or newer.
