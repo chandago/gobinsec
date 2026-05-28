@@ -5,15 +5,9 @@ default: [lint, test, integ]
 
 properties:
   AUDIT_ENABLED: true
+  DIST_ADDRESS: 'casa@sweetohm.net:/web/app/dist/={NAME}'
 
 targets:
-
-  release:
-    doc: "Perform a release"
-    depends: [branch, version, lint, test, integ, archive, dist]
-    steps:
-    - $: [git, tag, 'v={VERSION}']
-    - $: [git, push, --tags]
 
   integ:
     doc: "Perform integration tests"
@@ -40,3 +34,15 @@ targets:
     - if: 'diff != ""'
       then:
       - print: "diff: ={diff}"
+
+  release:
+    doc: "Perform a release"
+    depends: [branch, version, lint, test, integ, archive, dist]
+    steps:
+    - $: [git, tag, 'v={VERSION}']
+    - $: [git, push, --tags]
+
+  dist:
+    doc: "Deploy binaries on distribution server"
+    steps:
+    - $: 'scp ={BUILD_DIR}/={BIN_DIR}/newton-* ={DIST_ADDRESS}'
