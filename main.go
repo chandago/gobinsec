@@ -31,16 +31,16 @@ func main() {
 		os.Exit(0)
 	}
 	if len(flag.Args()) < 1 {
-		println("ERROR you must pass binary/ies to analyze on command line")
+		fmt.Fprintln(os.Stderr, "ERROR you must pass binary/ies to analyze on command line")
 		os.Exit(CodeError)
 	}
 	configuration, err := gobinsec.LoadConfig(*config, *strict, *wait, *verbose, *cache)
 	if err != nil {
-		println(fmt.Sprintf("ERROR %v", err))
+		fmt.Fprintf(os.Stderr, "ERROR %v\n", err)
 		os.Exit(CodeError)
 	}
 	if err := gobinsec.BuildCache(configuration); err != nil {
-		println(fmt.Sprintf("ERROR building cache: %v", err))
+		fmt.Fprintf(os.Stderr, "ERROR building cache: %v\n", err)
 		os.Exit(CodeError)
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
