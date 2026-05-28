@@ -22,11 +22,11 @@ This tool parses Go binary dependencies and calls [NVD database](https://nvd.nis
 
 ## Installation
 
-Download binary for your platform of the [latest release](https://github.com/chandago/gobinsec/releases). Rename it *gobinsec*, make it executable with `chmod +x gobinsec` and move it somewhere in your *PATH*.
+Download the binary for your platform from the [latest release](https://github.com/chandago/gobinsec/releases). Rename it *gobinsec*, make it executable with `chmod +x gobinsec` and move it somewhere in your *PATH*.
 
 ## Usage
 
-To analyze given binary:
+To analyze a given binary:
 
 ```yaml
 $ gobinsec path/to/binary
@@ -53,7 +53,7 @@ Exit code is *1* if exposed vulnerabilities were found, *2* if there was an erro
 
 You can pass *-verbose* option on command line to print vulnerability report, even if binary is not vulnerable and for all vulnerabilities, even if they are ignored or not exposed.
 
-To print cache information, pass *-cache* on command line. This will print dependencies along with following symbols:
+To print cache information, pass *-cache* on command line. This will print dependencies along with the following symbols:
 
 - **>>>** vulnerabilities sent in cache for given dependency
 - **<<<** vulnerabilities retrieved from cache for given dependency
@@ -61,7 +61,7 @@ To print cache information, pass *-cache* on command line. This will print depen
 
 You can set *-strict* flag on command line so that vulnerabilities without version are considered matching dependency version. In this case, you should check vulnerability manually and disable it in configuration file if necessary.
 
-You can pass configuration file with *-config config.yml*, see configuration section below.
+You can pass a configuration file with *-config config.yml*, see the configuration section below.
 
 ## Configuration
 
@@ -110,13 +110,13 @@ Note that without API key, you will be limited to *10* requests in a rolling *60
 
 ## Cache
 
-A cache is useful to limit NVD API calls. If you perform more call to NVD database than allowed, your calls will significantly slow down or you will get status code *403* calling the API.
+A cache is useful to limit NVD API calls. If you perform more calls to the NVD database than allowed, your calls will significantly slow down or you will get status code *403* when calling the API.
 
 Gobinsec tries to build caches in this order:
 
 ### Memcachier
 
-A cache is built with *Memcachier* if following section is found in configuration file:
+A cache is built with *Memcachier* if the following section is found in the configuration file:
 
 ```yaml
 memcachier:
@@ -127,7 +127,7 @@ memcachier:
   expiration: ...
 ```
 
-Else, il will look for following environment variables:
+Else, it will look for the following environment variables:
 
 ```
 MEMCACHIER_ADDRESS
@@ -143,7 +143,7 @@ MEMCACHIER_EXPIRATION
 
 ### Memcached
 
-A cache is built with *Memcached* if following section is found in configuration file:
+A cache is built with *Memcached* if the following section is found in the configuration file:
 
 ```yaml
 memcached:
@@ -152,7 +152,7 @@ memcached:
   expiration: ...
 ```
 
-Else it will look for following environment variables:
+Else it will look for the following environment variables:
 
 ```
 MEMCACHED_ADDRESS
@@ -162,11 +162,11 @@ MEMCACHED_EXPIRATION
 
 *Timeout* and *Expiration* configuration entries are optional and their default values are *1s* and *24h*.
 
-A sample [docker-compose.yml](https://github.com/intercloud/gobinsec/blob/main/docker-compose.yml) file to start a *memcached* instance is provided in this project.
+A sample [docker-compose.yml](https://github.com/chandago/gobinsec/blob/main/docker-compose.yml) file to start a *memcached* instance is provided in this project.
 
 ### File
 
-A file cache is used is none of preceding options is configured. By default, database file in YAML format is stored in *~/.gobinsec-cache.yml* and cache duration is of one day (or *24h*). You can overwrite these default values with following configuration section:
+A file cache is used if none of the preceding options is configured. By default, the database file in YAML format is stored in *~/.gobinsec-cache.yml* and cache duration is one day (or *24h*). You can overwrite these default values with following configuration section:
 
 ```yaml
 file:
@@ -201,19 +201,19 @@ Thus, you could write, for instance:
 
 ## Versions
 
-Dependencies and vulnerabilities have versions. Gobinsec recognises three formats and falls back to a fourth "unknown" category when none of them matches:
+Dependencies and vulnerabilities have versions. Gobinsec recognizes three formats and falls back to a fourth "unknown" category when none of them matches:
 
 - **Tag**: which implements semantic versioning, such as `1.2.3` or `v1.2.3`
 - **Commit**: such as `v0.0.0-20210410081132-afb366fc7cd1` which is made of three parts: a major version, build date and commit ID
 - **Date**: in ISO format such as `2022-01-07`
 - **Unknown**: any version string that does not parse as one of the three above
 
-A dependency may have a tag or commit version. In the first case, developer used a released version of this dependency, in the last he's using a particular commit that wasn't released.
+A dependency may have a tag or commit version. In the first case, the developer used a released version of this dependency; in the latter, they used a specific commit that wasn't released.
 
 A vulnerability might have version conditions on tag or date. For instance:
 
 - `v < 2017-03-17` means that vulnerability will affect dependencies before *2017-03-17*.
-- `1.16.0 <= v <= 1.16.4` means that vulnerability will affect dependencies from version *1.16.0* to *1.16.4*, included
+- `1.16.0 <= v <= 1.16.4` means that vulnerability will affect dependencies from version *1.16.0* to *1.16.4*, inclusive
 
 Given vulnerability is exposed if dependency version is in the range of affected versions. Thus to determine if a dependency is affected we must be able to compare versions between dependency and vulnerability.
 
@@ -221,17 +221,17 @@ Given vulnerability is exposed if dependency version is in the range of affected
 - This is possible if dependency has a tag version and vulnerability a tag one
 - This is not possible if dependency has a tag version and vulnerability a date one
 
-In this later case, the vulnerability is considered exposed. You should check manually if release date of the dependency is in the date range of the vulnerability or not. You can then ignore vulnerability adding its ID in the configuration *ignore* list.
+In this latter case, the vulnerability is considered exposed. You should check manually if release date of the dependency is in the date range of the vulnerability or not. You can then ignore vulnerability adding its ID in the configuration *ignore* list.
 
-Sometimes, vulnerabilities have no version or date range. This is the case when vulnerability affects a given software (a Linux distribution for instance). In this case, vulnerability condition appears as a question mark and we consider that dependency is not affected. You can change this behavior passing `-strict` option on command line or in configuration. In this case you will have to check manually and ignore such vulnerabilities.
+Sometimes, vulnerabilities have no version or date range. This is the case when vulnerability affects a given software (a Linux distribution for instance). In this case, the vulnerability condition appears as a question mark and we consider that the dependency is not affected. You can change this behavior by passing the `-strict` option on the command line or in the configuration. In this case you will have to check manually and ignore such vulnerabilities.
 
-When a dependency carries a version that does not parse as a tag, commit, or date (the *unknown* case), Gobinsec cannot compare it against any vulnerability's version range. For safety, such a dependency is conservatively reported as exposed to *every* CVE that references its name. Inspect each match by hand and, when it does not actually apply, add the CVE to the configuration `ignore` list. This behaviour is independent of the `-strict` flag (which only governs vulnerabilities that have no version range at all).
+When a dependency carries a version that does not parse as a tag, commit, or date (the *unknown* case), Gobinsec cannot compare it against any vulnerability's version range. For safety, such a dependency is conservatively reported as exposed to *every* CVE that references its name. Inspect each match by hand and, when it does not actually apply, add the CVE to the configuration `ignore` list. This behavior is independent of the `-strict` flag (which only governs vulnerabilities that have no version range at all).
 
 ## How to Fix Vulnerabilities
 
-In some cases, you can fix a vulnerability by using latest dependency version. Let's say dependency *golang.org/x/crypto* in version *v0.0.0-20200622213623-75b288015ac9* is affected by vulnerability [CVE-2020-29652](https://nvd.nist.gov/vuln/detail/CVE-2020-29652).
+In some cases, you can fix a vulnerability by using the latest dependency version. Let's say dependency *golang.org/x/crypto* in version *v0.0.0-20200622213623-75b288015ac9* is affected by vulnerability [CVE-2020-29652](https://nvd.nist.gov/vuln/detail/CVE-2020-29652).
 
-We can see in vulnerability description that it was fixed after version *0.0.0-20201203163018-be400aefbc4c*. Thus latest version *v0.0.0-20220128200615-198e4374d7ed* will fix the issue. We can update this dependency to latest version with following commands:
+We can see in the vulnerability description that it was fixed after version *0.0.0-20201203163018-be400aefbc4c*. Thus the latest version *v0.0.0-20220128200615-198e4374d7ed* will fix the issue. We can update this dependency to the latest version with the following commands:
 
 ```
 $ go get -u golang.org/x/crypto
@@ -253,9 +253,9 @@ Here is a list of sites where you can find information about vulnerabilities:
 
 ## How Gobinsec works
 
-This tool first lists dependencies embedded in binary using [buildinfo package](https://pkg.go.dev/debug/buildinfo).
+This tool first lists dependencies embedded in the binary using the [buildinfo package](https://pkg.go.dev/debug/buildinfo).
 
-Then, it calls [National Vulnerability Database](https://nvd.nist.gov/) to lists known vulnerabilities for embedded dependencies. You can find documentation on its API at <https://nvd.nist.gov/developers/vulnerabilities> and get an API key here: <https://nvd.nist.gov/developers/request-an-api-key>.
+Then, it calls the [National Vulnerability Database](https://nvd.nist.gov/) to list known vulnerabilities for embedded dependencies. You can find documentation on its API at <https://nvd.nist.gov/developers/vulnerabilities> and get an API key here: <https://nvd.nist.gov/developers/request-an-api-key>.
 
 For instance, to get vulnerabilities for library *golang.org/x/text*, we would call <https://services.nvd.nist.gov/rest/json/cves/1.0/?keyword=golang.org/x/text>, which returns following JSON payload:
 
@@ -321,10 +321,10 @@ For instance, to get vulnerabilities for library *golang.org/x/text*, we would c
 }
 ```
 
-This data is parsed to produce YAML report.
+This data is parsed to produce a YAML report.
 
 # License
 
-This software is release under the [GNU General Public License](https://www.gnu.org/licenses/gpl-3.0.html).
+This software is released under the [GNU General Public License](https://www.gnu.org/licenses/gpl-3.0.html).
 
 *Enjoy!*
