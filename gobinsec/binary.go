@@ -1,6 +1,7 @@
 package gobinsec
 
 import (
+	"context"
 	"debug/buildinfo"
 	"fmt"
 	"os"
@@ -22,7 +23,7 @@ type Binary struct {
 }
 
 // NewBinary returns a binary
-func NewBinary(path string, cfg *Config) (*Binary, error) {
+func NewBinary(ctx context.Context, path string, cfg *Config) (*Binary, error) {
 	if _, err := os.Stat(path); err != nil {
 		return nil, err
 	}
@@ -30,14 +31,14 @@ func NewBinary(path string, cfg *Config) (*Binary, error) {
 		Path:   path,
 		Config: cfg,
 	}
-	if err := binary.GetDependencies(); err != nil {
+	if err := binary.GetDependencies(ctx); err != nil {
 		return nil, err
 	}
 	return &binary, nil
 }
 
 // GetDependencies gets dependencies analyzing binary with buildinfo
-func (b *Binary) GetDependencies() error {
+func (b *Binary) GetDependencies(ctx context.Context) error {
 	info, err := buildinfo.ReadFile(b.Path)
 	if err != nil {
 		return err
@@ -63,7 +64,7 @@ func (b *Binary) GetDependencies() error {
 	for i := 0; i < numGoroutines; i++ {
 		go func() {
 			defer wg.Done()
-			if err := LoadVulnerabilities(dependencies); err != nil {
+			if err := LoadVulnerabilities(ctx, dependencies); err != nil {
 				errCh <- err
 			}
 		}()
@@ -81,14 +82,22 @@ func (b *Binary) GetDependencies() error {
 	return nil
 }
 
-// LoadVulnerabilities takes dependencies from channel and loads dependencies for it
-func LoadVulnerabilities(dependencies chan *Dependency) error {
-	for dependency := range dependencies {
-		if err := dependency.LoadVulnerabilities(); err != nil {
-			return fmt.Errorf("loading vulnerability: %w", err)
+// LoadVulnerabilities takes dependencies from channel and loads vulnerabilities for each.
+// Returns early with ctx.Err() if the context is cancelled.
+func LoadVulnerabilities(ctx context.Context, dependencies chan *Dependency) error {
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case dependency, ok := <-dependencies:
+			if !ok {
+				return nil
+			}
+			if err := dependency.LoadVulnerabilities(ctx); err != nil {
+				return fmt.Errorf("loading vulnerability: %w", err)
+			}
 		}
 	}
-	return nil
 }
 
 // Report prints a report on terminal

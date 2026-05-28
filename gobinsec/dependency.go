@@ -4,6 +4,7 @@ package gobinsec
 // https://nvd.nist.gov/developers/start-here
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -52,14 +53,16 @@ func NewDependency(name, version string, cfg *Config) *Dependency {
 }
 
 // Vulnerabilities return list of vulnerabilities for given dependency
-func (d *Dependency) LoadVulnerabilities() error {
+func (d *Dependency) LoadVulnerabilities(ctx context.Context) error {
 	vulnerabilities, err := CacheInstance.Get(d)
 	if err != nil {
 		return err
 	}
 	if vulnerabilities == nil {
-		d.waitBeforeCall()
-		vulnerabilities, err = d.fetchVulnerabilities(0)
+		if err := d.waitBeforeCall(ctx); err != nil {
+			return err
+		}
+		vulnerabilities, err = d.fetchVulnerabilities(ctx, 0)
 		if err != nil {
 			return err
 		}
@@ -88,14 +91,29 @@ func (d *Dependency) LoadVulnerabilities() error {
 	return nil
 }
 
-// waitBeforeCall waits in order not to exceed NVD call rate limit
-func (d *Dependency) waitBeforeCall() {
-	if d.Config.Wait {
-		if d.Config.APIKey != "" {
-			time.Sleep(WaitWithKey)
-		} else {
-			time.Sleep(WaitWithoutKey)
-		}
+// waitBeforeCall waits in order not to exceed NVD call rate limit.
+// Returns ctx.Err() if the context is cancelled during the sleep.
+func (d *Dependency) waitBeforeCall(ctx context.Context) error {
+	if !d.Config.Wait {
+		return nil
+	}
+	delay := WaitWithoutKey
+	if d.Config.APIKey != "" {
+		delay = WaitWithKey
+	}
+	return sleepCtx(ctx, delay)
+}
+
+// sleepCtx sleeps for the given duration, returning early with ctx.Err()
+// if the context is cancelled.
+func sleepCtx(ctx context.Context, d time.Duration) error {
+	t := time.NewTimer(d)
+	defer t.Stop()
+	select {
+	case <-t.C:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
 	}
 }
 
@@ -104,9 +122,9 @@ func (d *Dependency) Key() string {
 	return d.Name
 }
 
-func (d *Dependency) fetchVulnerabilities(attempt int) ([]byte, error) {
+func (d *Dependency) fetchVulnerabilities(ctx context.Context, attempt int) ([]byte, error) {
 	client := &http.Client{Timeout: HTTPRequestTimeout}
-	request, err := http.NewRequest("GET", URL+d.Name, nil)
+	request, err := http.NewRequestWithContext(ctx, "GET", URL+d.Name, nil)
 	if err != nil {
 		return nil, fmt.Errorf("creating NVD request: %v", err)
 	}
@@ -121,8 +139,10 @@ func (d *Dependency) fetchVulnerabilities(attempt int) ([]byte, error) {
 	if response.StatusCode >= StatusCodeLimit {
 		if response.StatusCode == http.StatusTooManyRequests {
 			if attempt < MaxAttempts {
-				time.Sleep(WaitOnTooManyAttempts)
-				return d.fetchVulnerabilities(attempt + 1)
+				if err := sleepCtx(ctx, WaitOnTooManyAttempts); err != nil {
+					return nil, err
+				}
+				return d.fetchVulnerabilities(ctx, attempt+1)
 			}
 		}
 		return nil, fmt.Errorf("bad status code calling NVD: %d", response.StatusCode)

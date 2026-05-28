@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/chandago/gobinsec/gobinsec"
 )
@@ -40,10 +43,12 @@ func main() {
 		println(fmt.Sprintf("ERROR building cache: %v", err))
 		os.Exit(CodeError)
 	}
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 	vulnerable := false
 	analysisError := false
 	for _, path := range flag.Args() {
-		binary, err := gobinsec.NewBinary(path, configuration)
+		binary, err := gobinsec.NewBinary(ctx, path, configuration)
 		if err != nil {
 			_, _ = gobinsec.ColorRed.Print("ERROR")
 			fmt.Printf(" analyzing %s: %v\n", path, err)
