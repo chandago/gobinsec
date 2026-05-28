@@ -1,6 +1,7 @@
 package gobinsec
 
 import (
+	"context"
 	"debug/buildinfo"
 	"fmt"
 	"os"
@@ -8,11 +9,6 @@ import (
 	"runtime"
 	"strings"
 	"sync"
-)
-
-const (
-	MinimumBinaryDependencyFields = 3
-	MinimumBinaryLines            = 3
 )
 
 // NumGoroutines to load vulnerabilities
@@ -23,24 +19,26 @@ type Binary struct {
 	Path         string        // path to binary file
 	Dependencies []*Dependency // list of dependencies
 	Vulnerable   bool          // tells if binary is vulnerable
+	Config       *Config       // configuration
 }
 
 // NewBinary returns a binary
-func NewBinary(path string) (*Binary, error) {
+func NewBinary(ctx context.Context, path string, cfg *Config) (*Binary, error) {
 	if _, err := os.Stat(path); err != nil {
 		return nil, err
 	}
 	binary := Binary{
-		Path: path,
+		Path:   path,
+		Config: cfg,
 	}
-	if err := binary.GetDependencies(); err != nil {
+	if err := binary.GetDependencies(ctx); err != nil {
 		return nil, err
 	}
 	return &binary, nil
 }
 
 // GetDependencies gets dependencies analyzing binary with buildinfo
-func (b *Binary) GetDependencies() error {
+func (b *Binary) GetDependencies(ctx context.Context) error {
 	info, err := buildinfo.ReadFile(b.Path)
 	if err != nil {
 		return err
@@ -49,26 +47,33 @@ func (b *Binary) GetDependencies() error {
 		for dep.Replace != nil {
 			dep = dep.Replace
 		}
-		dependency, err := NewDependency(dep.Path, dep.Version)
-		if err != nil {
-			return err
-		}
-		b.Dependencies = append(b.Dependencies, dependency)
-	}
-	dependencies := make(chan *Dependency, len(b.Dependencies))
-	var wg sync.WaitGroup
-	for _, dependency := range b.Dependencies {
-		dependencies <- dependency
-		wg.Add(1)
+		b.Dependencies = append(b.Dependencies, NewDependency(dep.Path, dep.Version, b.Config))
 	}
 	numGoroutines := NumGoroutines
-	if config.Wait {
+	if b.Config.Wait {
 		numGoroutines = 1
 	}
+	dependencies := make(chan *Dependency, len(b.Dependencies))
+	for _, dependency := range b.Dependencies {
+		dependencies <- dependency
+	}
+	close(dependencies)
+	var wg sync.WaitGroup
+	wg.Add(numGoroutines)
+	errCh := make(chan error, numGoroutines)
 	for i := 0; i < numGoroutines; i++ {
-		go LoadVulnerabilities(dependencies, &wg)
+		go func() {
+			defer wg.Done()
+			if err := LoadVulnerabilities(ctx, dependencies); err != nil {
+				errCh <- err
+			}
+		}()
 	}
 	wg.Wait()
+	close(errCh)
+	if err, ok := <-errCh; ok {
+		return err
+	}
 	for _, dependency := range b.Dependencies {
 		if dependency.Vulnerable {
 			b.Vulnerable = true
@@ -77,18 +82,20 @@ func (b *Binary) GetDependencies() error {
 	return nil
 }
 
-// LoadVulnerabilities takes dependencies from channel and loads dependencies for it
-func LoadVulnerabilities(dependencies chan *Dependency, wg *sync.WaitGroup) {
+// LoadVulnerabilities takes dependencies from channel and loads vulnerabilities for each.
+// Returns early with ctx.Err() if the context is cancelled.
+func LoadVulnerabilities(ctx context.Context, dependencies chan *Dependency) error {
 	for {
 		select {
-		case dependency := <-dependencies:
-			if err := dependency.LoadVulnerabilities(); err != nil {
-				fmt.Fprintf(os.Stderr, "ERROR loading vulnerability: %v\n", err)
-				os.Exit(1)
+		case <-ctx.Done():
+			return ctx.Err()
+		case dependency, ok := <-dependencies:
+			if !ok {
+				return nil
 			}
-			wg.Done()
-		default:
-			return
+			if err := dependency.LoadVulnerabilities(ctx); err != nil {
+				return fmt.Errorf("loading vulnerability: %w", err)
+			}
 		}
 	}
 }
@@ -101,10 +108,10 @@ func (b *Binary) Report() {
 	} else {
 		_, _ = ColorGreen.Println("OK")
 	}
-	if len(b.Dependencies) > 0 && (b.Vulnerable || config.Verbose) {
+	if len(b.Dependencies) > 0 && (b.Vulnerable || b.Config.Verbose) {
 		fmt.Println("dependencies:")
 		for _, dependency := range b.Dependencies {
-			if !dependency.Vulnerable && !config.Verbose {
+			if !dependency.Vulnerable && !b.Config.Verbose {
 				continue
 			}
 			fmt.Printf("- name:    '%s'\n", dependency.Name)
@@ -113,7 +120,7 @@ func (b *Binary) Report() {
 			if len(dependency.Vulnerabilities) > 0 {
 				fmt.Println("  vulnerabilities:")
 				for _, vulnerability := range dependency.Vulnerabilities {
-					if !vulnerability.Exposed && !config.Verbose {
+					if !vulnerability.Exposed && !b.Config.Verbose {
 						continue
 					}
 					fmt.Printf("  - id: '%s'\n", vulnerability.ID)
@@ -123,8 +130,8 @@ func (b *Binary) Report() {
 					for _, reference := range vulnerability.References {
 						fmt.Printf("    - '%s'\n", reference)
 					}
-					fmt.Println("    matchs:")
-					for _, match := range vulnerability.Matchs {
+					fmt.Println("    matches:")
+					for _, match := range vulnerability.Matches {
 						var text string
 						if match.VersionStartExcluding != nil ||
 							match.VersionStartIncluding != nil ||

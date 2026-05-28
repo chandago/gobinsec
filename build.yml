@@ -1,6 +1,7 @@
 # NeON build file (https://c4s4/neon)
 
 extends: chandago/neon/golang.yml
+default: [lint, test, integ]
 
 properties:
   AUDIT_ENABLED: true
@@ -8,8 +9,34 @@ properties:
 targets:
 
   release:
-    depends: [branch, version, clean, lint, test, archive]
     doc: "Perform a release"
+    depends: [branch, version, lint, test, integ, archive]
     steps:
     - $: [git, tag, 'v={VERSION}']
     - $: [git, push, --tags]
+
+  integ:
+    doc: "Perform integration tests"
+    depends: [clean, build]
+    steps:
+    - print: "Generate report with configuration"
+    - $: ['={BUILD_DIR}/gobinsec', -config, test/config.yml, -verbose, test/binary]
+      3x: true
+      3>: '={BUILD_DIR}/report-config.yml'
+    - $: [diff, test/report-config.yml, '={BUILD_DIR}/report-config.yml']
+      3x: true
+      3=: diff
+    - if: 'diff != ""'
+      then:
+      - print: "diff: ={diff}"
+    - print: "Generate report without configuration"
+    - try:
+      - $: ['={BUILD_DIR}/gobinsec', -verbose, test/binary]
+        3x: true
+        3>: '={BUILD_DIR}/report.yml'
+    - $: [diff, test/report.yml, '={BUILD_DIR}/report.yml']
+      3x: true
+      3=: diff
+    - if: 'diff != ""'
+      then:
+      - print: "diff: ={diff}"

@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/bradfitz/gomemcache/memcache"
+	"github.com/memcachier/gomemcache/memcache"
 )
 
 const (
@@ -106,9 +106,13 @@ func (mc *MemcachedClient) Set(d *Dependency, v []byte) error {
 	return nil
 }
 
-// Ping calls memcached
+// Open checks connectivity by querying a non-existent key; ErrCacheMiss is a successful round-trip.
 func (mc *MemcachedClient) Open() error {
-	return mc.Client.Ping()
+	_, err := mc.Client.Get("gobinsec-connectivity-probe")
+	if err != nil && !errors.Is(err, memcache.ErrCacheMiss) {
+		return err
+	}
+	return nil
 }
 
 // Clean does nothing

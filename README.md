@@ -66,7 +66,7 @@ dependencies:
     references:
     - 'https://groups.google.com/forum/#!topic/golang-announce/bXVeAmGOqz0'
     - 'https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/TACQFZDPA7AUR6TRZBCX2RGRFSDYLI7O/'
-    matchs:
+    matches:
     - 'v < 0.3.3'
     - '?'
 ```
@@ -225,11 +225,12 @@ Thus, you could write, for instance:
 
 ## Versions
 
-Dependencies and vulnerabilities have versions. There are three types of them:
+Dependencies and vulnerabilities have versions. Gobinsec recognises three formats and falls back to a fourth "unknown" category when none of them matches:
 
 - **Tag**: which implements semantic versioning, such as `1.2.3` or `v1.2.3`
 - **Commit**: such as `v0.0.0-20210410081132-afb366fc7cd1` which is made of three parts: a major version, build date and commit ID
 - **Date**: in ISO format such as `2022-01-07`
+- **Unknown**: any version string that does not parse as one of the three above
 
 A dependency may have a tag or commit version. In the first case, developer used a released version of this dependency, in the last he's using a particular commit that wasn't released.
 
@@ -247,6 +248,8 @@ Given vulnerability is exposed if dependency version is in the range of affected
 In this later case, the vulnerability is considered exposed. You should check manually if release date of the dependency is in the date range of the vulnerability or not. You can then ignore vulnerability adding its ID in the configuration *ignore* list.
 
 Sometimes, vulnerabilities have no version or date range. This is the case when vulnerability affects a given software (a Linux distribution for instance). In this case, vulnerability condition appears as a question mark and we consider that dependency is not affected. You can change this behavior passing `-strict` option on command line or in configuration. In this case you will have to check manually and ignore such vulnerabilities.
+
+When a dependency carries a version that does not parse as a tag, commit, or date (the *unknown* case), Gobinsec cannot compare it against any vulnerability's version range. For safety, such a dependency is conservatively reported as exposed to *every* CVE that references its name. Inspect each match by hand and, when it does not actually apply, add the CVE to the configuration `ignore` list. This behaviour is independent of the `-strict` flag (which only governs vulnerabilities that have no version range at all).
 
 ## How to Fix Vulnerabilities
 

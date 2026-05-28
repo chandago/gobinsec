@@ -22,7 +22,7 @@ type FileConfig struct {
 
 // DependencyCache is an entry of dependency cache
 type DependencyCache struct {
-	Date            string
+	Date            time.Time
 	Vulnerabilities string
 }
 
@@ -101,9 +101,8 @@ func (fc *FileCache) Set(d *Dependency, v []byte) error {
 	key := d.Key()
 	lock.Lock()
 	defer lock.Unlock()
-	now := time.Now().UTC().Format("2006-01-02T15:04:05")
 	cache := DependencyCache{
-		Date:            now,
+		Date:            time.Now().UTC(),
 		Vulnerabilities: string(v),
 	}
 	fc.Cache[key] = cache
@@ -132,7 +131,7 @@ func (fc *FileCache) Close() error {
 	if err != nil {
 		return fmt.Errorf("marshaling file cache: %v", err)
 	}
-	if err := os.WriteFile(fc.File, text, 0644); err != nil {
+	if err := os.WriteFile(fc.File, text, 0600); err != nil {
 		return fmt.Errorf("saving file cache: %v", err)
 	}
 	return nil
@@ -140,9 +139,9 @@ func (fc *FileCache) Close() error {
 
 // CleanCache removes obsolete cache entries
 func (fc *FileCache) CleanCache() {
-	limit := time.Now().UTC().Add(-fc.Expiration).Format("2006-01-02T15:04:05")
+	limit := time.Now().UTC().Add(-fc.Expiration)
 	for name, cache := range fc.Cache {
-		if cache.Date < limit {
+		if cache.Date.Before(limit) {
 			delete(fc.Cache, name)
 		}
 	}
