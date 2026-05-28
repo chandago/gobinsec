@@ -14,23 +14,23 @@ type Cache interface {
 }
 
 // NewCache builds a cache instance depending on configuration and environment
-func NewCache() error {
+func NewCache(cfg *Config) error {
 	var err error
-	CacheInstance, err = NewMemcachierCache(config.Memcachier)
+	CacheInstance, err = NewMemcachierCache(cfg.Memcachier)
 	if err != nil {
 		return fmt.Errorf("configuring memcachier: %v", err)
 	}
 	if CacheInstance != nil {
 		return nil
 	}
-	CacheInstance, err = NewMemcachedCache(config.Memcached)
+	CacheInstance, err = NewMemcachedCache(cfg.Memcached)
 	if err != nil {
 		return fmt.Errorf("configuring memcached: %v", err)
 	}
 	if CacheInstance != nil {
 		return nil
 	}
-	CacheInstance, err = NewFileCache(config.File)
+	CacheInstance, err = NewFileCache(cfg.File)
 	if err != nil {
 		return fmt.Errorf("configuring file cache: %v", err)
 	}
@@ -38,11 +38,11 @@ func NewCache() error {
 }
 
 // BuildCache and open it
-func BuildCache() error {
-	if err := NewCache(); err != nil {
+func BuildCache(cfg *Config) error {
+	if err := NewCache(cfg); err != nil {
 		return err
 	}
-	if config.Cache {
+	if cfg.Cache {
 		CacheInstance = NewCacheLogger(CacheInstance)
 	}
 	return CacheInstance.Open()

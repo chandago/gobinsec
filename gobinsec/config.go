@@ -20,36 +20,34 @@ type Config struct {
 	Wait       bool              `yaml:"wait"`
 }
 
-// config is shared
-var config Config
-
 // LoadConfig loads configuration from given file and overwrite with command line options
-func LoadConfig(path string, strict, wait, verbose, cache bool) error {
+func LoadConfig(path string, strict, wait, verbose, cache bool) (*Config, error) {
+	var cfg Config
 	if path != "" {
 		bytes, err := os.ReadFile(path)
 		if err != nil {
-			return fmt.Errorf("loading configuration file: %v", err)
+			return nil, fmt.Errorf("loading configuration file: %v", err)
 		}
-		if err := yaml.Unmarshal(bytes, &config); err != nil {
-			return fmt.Errorf("parsing configuration: %v", err)
+		if err := yaml.Unmarshal(bytes, &cfg); err != nil {
+			return nil, fmt.Errorf("parsing configuration: %v", err)
 		}
 	}
-	if config.APIKey == "" {
-		config.APIKey = os.Getenv("NVD_API_KEY")
+	if cfg.APIKey == "" {
+		cfg.APIKey = os.Getenv("NVD_API_KEY")
 	}
 	if strict {
-		config.Strict = true
+		cfg.Strict = true
 	}
 	if wait {
-		config.Wait = true
+		cfg.Wait = true
 	}
 	if verbose {
-		config.Verbose = true
+		cfg.Verbose = true
 	}
 	if cache {
-		config.Cache = true
+		cfg.Cache = true
 	}
-	return nil
+	return &cfg, nil
 }
 
 // IgnoreVulnerability tells if we should ignore given vulnerability

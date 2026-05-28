@@ -31,18 +31,19 @@ func main() {
 		println("ERROR you must pass binary/ies to analyze on command line")
 		os.Exit(CodeError)
 	}
-	if err := gobinsec.LoadConfig(*config, *strict, *wait, *verbose, *cache); err != nil {
+	configuration, err := gobinsec.LoadConfig(*config, *strict, *wait, *verbose, *cache)
+	if err != nil {
 		println(fmt.Sprintf("ERROR %v", err))
 		os.Exit(CodeError)
 	}
-	if err := gobinsec.BuildCache(); err != nil {
+	if err := gobinsec.BuildCache(configuration); err != nil {
 		println(fmt.Sprintf("ERROR building cache: %v", err))
 		os.Exit(CodeError)
 	}
 	vulnerable := false
 	analysisError := false
 	for _, path := range flag.Args() {
-		binary, err := gobinsec.NewBinary(path)
+		binary, err := gobinsec.NewBinary(path, configuration)
 		if err != nil {
 			_, _ = gobinsec.ColorRed.Print("ERROR")
 			fmt.Printf(" analyzing %s: %v\n", path, err)

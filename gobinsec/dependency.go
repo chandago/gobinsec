@@ -28,6 +28,7 @@ type Dependency struct {
 	Version         Version
 	Vulnerabilities []Vulnerability
 	Vulnerable      bool
+	Config          *Config
 }
 
 // WaitWithoutKey is the time to wait between NVD API calls without API key
@@ -42,10 +43,11 @@ func init() {
 }
 
 // NewDependency builds a new dependency
-func NewDependency(name, version string) *Dependency {
+func NewDependency(name, version string, cfg *Config) *Dependency {
 	return &Dependency{
 		Name:    name,
 		Version: NewVersion(version),
+		Config:  cfg,
 	}
 }
 
@@ -56,7 +58,7 @@ func (d *Dependency) LoadVulnerabilities() error {
 		return err
 	}
 	if vulnerabilities == nil {
-		WaitBeforeCall()
+		d.waitBeforeCall()
 		vulnerabilities, err = d.fetchVulnerabilities(0)
 		if err != nil {
 			return err
@@ -70,7 +72,7 @@ func (d *Dependency) LoadVulnerabilities() error {
 		return fmt.Errorf("decoding JSON response: %v", err)
 	}
 	for _, item := range result.Vulnerabilities {
-		vulnerability, err := NewVulnerability(item.CVE)
+		vulnerability, err := NewVulnerability(item.CVE, d.Config)
 		if err != nil {
 			return err
 		}
@@ -86,10 +88,10 @@ func (d *Dependency) LoadVulnerabilities() error {
 	return nil
 }
 
-// WaitBeforeCall waits in order not to exceed NVD call rate limit
-func WaitBeforeCall() {
-	if config.Wait {
-		if config.APIKey != "" {
+// waitBeforeCall waits in order not to exceed NVD call rate limit
+func (d *Dependency) waitBeforeCall() {
+	if d.Config.Wait {
+		if d.Config.APIKey != "" {
 			time.Sleep(WaitWithKey)
 		} else {
 			time.Sleep(WaitWithoutKey)
@@ -108,8 +110,8 @@ func (d *Dependency) fetchVulnerabilities(attempt int) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("creating NVD request: %v", err)
 	}
-	if config.APIKey != "" {
-		request.Header.Set("apiKey", config.APIKey)
+	if d.Config.APIKey != "" {
+		request.Header.Set("apiKey", d.Config.APIKey)
 	}
 	response, err := client.Do(request)
 	if err != nil {

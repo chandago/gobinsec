@@ -18,15 +18,17 @@ type Binary struct {
 	Path         string        // path to binary file
 	Dependencies []*Dependency // list of dependencies
 	Vulnerable   bool          // tells if binary is vulnerable
+	Config       *Config       // configuration
 }
 
 // NewBinary returns a binary
-func NewBinary(path string) (*Binary, error) {
+func NewBinary(path string, cfg *Config) (*Binary, error) {
 	if _, err := os.Stat(path); err != nil {
 		return nil, err
 	}
 	binary := Binary{
-		Path: path,
+		Path:   path,
+		Config: cfg,
 	}
 	if err := binary.GetDependencies(); err != nil {
 		return nil, err
@@ -44,10 +46,10 @@ func (b *Binary) GetDependencies() error {
 		for dep.Replace != nil {
 			dep = dep.Replace
 		}
-		b.Dependencies = append(b.Dependencies, NewDependency(dep.Path, dep.Version))
+		b.Dependencies = append(b.Dependencies, NewDependency(dep.Path, dep.Version, b.Config))
 	}
 	numGoroutines := NumGoroutines
-	if config.Wait {
+	if b.Config.Wait {
 		numGoroutines = 1
 	}
 	dependencies := make(chan *Dependency, len(b.Dependencies))
@@ -97,10 +99,10 @@ func (b *Binary) Report() {
 	} else {
 		_, _ = ColorGreen.Println("OK")
 	}
-	if len(b.Dependencies) > 0 && (b.Vulnerable || config.Verbose) {
+	if len(b.Dependencies) > 0 && (b.Vulnerable || b.Config.Verbose) {
 		fmt.Println("dependencies:")
 		for _, dependency := range b.Dependencies {
-			if !dependency.Vulnerable && !config.Verbose {
+			if !dependency.Vulnerable && !b.Config.Verbose {
 				continue
 			}
 			fmt.Printf("- name:    '%s'\n", dependency.Name)
@@ -109,7 +111,7 @@ func (b *Binary) Report() {
 			if len(dependency.Vulnerabilities) > 0 {
 				fmt.Println("  vulnerabilities:")
 				for _, vulnerability := range dependency.Vulnerabilities {
-					if !vulnerability.Exposed && !config.Verbose {
+					if !vulnerability.Exposed && !b.Config.Verbose {
 						continue
 					}
 					fmt.Printf("  - id: '%s'\n", vulnerability.ID)
